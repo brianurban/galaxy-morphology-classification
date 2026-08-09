@@ -12,7 +12,7 @@ A comparative study evaluating deep learning and traditional machine learning ap
 
 - **Overfitting plagues ensemble methods on low-dimensional features.** RandomForest and ExtraTrees both hit 99.8% training accuracy but dropped to ~35% on test, while SVM's RBF decision boundary generalized better from 14 PCA components (44.3% train, 36.8% test).
 
-- **Feature engineering quality constrains the performance ceiling.** 28 hand-crafted features (Haralick textures, Hu moments, shape moments, color statistics, edge intensity) encode meaningful but incomplete morphological information — sufficient for separating mergers from smooth ellipticals, inadequate for barred vs. unbarred spirals.
+- **Feature engineering quality constrains the performance ceiling.** 28 hand-crafted features (Haralick textures, Hu moments, shape moments, color statistics, edge intensity) encode meaningful but incomplete morphological information—sufficient for separating mergers from smooth ellipticals, inadequate for barred vs. unbarred spirals.
 
 - **CNNs are expected to dominate with adequate training.** Published transfer learning benchmarks on Galaxy10 DECaLS report 80%+ accuracy with 20+ epochs on GPU and backbone unfreezing, motivating the shift from hand-crafted features to learned spatial representations.
 
@@ -22,7 +22,7 @@ A comparative study evaluating deep learning and traditional machine learning ap
 
 ![Class Distribution](galaxy-figures/01-class-distribution.png)
 
-*Figure 1: Class distribution across 10 morphological categories, showing significant imbalance — from 234 Cigar Shaped Smooth to 1,851 Round Smooth galaxies.*
+*Figure 1: Class distribution across 10 morphological categories, showing significant imbalance—from 234 Cigar Shaped Smooth to 1,851 Round Smooth galaxies.*
 
 <br>
 
@@ -58,7 +58,7 @@ A comparative study evaluating deep learning and traditional machine learning ap
 
 ![PCA Variance](galaxy-figures/07-pca-explained-variance.png)
 
-*Figure 7: PCA explained variance — 14 components retain 95.5% of total variance from 28 standardized features.*
+*Figure 7: PCA explained variance—14 components retain 95.5% of total variance from 28 standardized features.*
 
 <br>
 
@@ -93,7 +93,7 @@ A comparative study evaluating deep learning and traditional machine learning ap
 | 4 | ExtraTrees | Traditional ML | 34.5% | 0.29 | 0.33 | Severe (99.8% train) |
 | 5 | kNN | Traditional ML | 25.9% | 0.23 | 0.26 | Moderate |
 
-*Test accuracy computed on held-out test set (2,661 samples). EfficientNet-B0 trained for 5 epochs on CPU with frozen backbone — preliminary baseline, not fully converged.*
+*Test accuracy computed on held-out test set (2,661 samples). EfficientNet-B0 trained for 5 epochs on CPU with frozen backbone—preliminary baseline, not fully converged.*
 
 ---
 
@@ -139,7 +139,7 @@ Walmsley, M. et al. (2022). *Galaxy Zoo DECaLS: Detailed Visual Morphology Measu
 
 | Feature Group | Description | Dimensions |
 |---------------|-------------|------------|
-| Haralick Textures (GLCM) | Contrast, dissimilarity, homogeneity, energy, correlation, ASM — averaged across 4 directions | 6 |
+| Haralick Textures (GLCM) | Contrast, dissimilarity, homogeneity, energy, correlation, ASM—averaged across 4 directions | 6 |
 | Normalized Central Shape Moments | Spatial intensity distribution (nu20, nu11, nu02, nu30, nu21, nu12, nu03) | 7 |
 | Hu Moments | Seven invariant shape moments (translation, rotation, scale invariant) | 7 |
 | Color Statistics | Mean and standard deviation per RGB channel | 6 |
