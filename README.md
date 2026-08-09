@@ -6,7 +6,7 @@ A comparative study evaluating deep learning and traditional machine learning ap
 
 ## Key Findings
 
-- **Traditional ML marginally outperformed a limited CNN baseline.** SVM (RBF) achieved 36.8% test accuracy versus EfficientNet-B0's 31.6% — though the CNN was constrained to 5 epochs on CPU with a frozen backbone, far below the 20+ epochs needed for convergence.
+- **Traditional ML marginally outperformed a limited CNN baseline.** SVM (RBF) achieved 36.8% test accuracy versus EfficientNet-B0's 31.6%—though the CNN was constrained to 5 epochs on CPU with a frozen backbone, far below the 20+ epochs needed for convergence.
 
 - **Hand-crafted features capture broad categories but miss fine-grained distinctions.** All traditional ML models achieved 0% F1 on the rarest class (Cigar Shaped Smooth, 234 training samples), exposing a fundamental limitation of scalar descriptors for underrepresented morphologies.
 
