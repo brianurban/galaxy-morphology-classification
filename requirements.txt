@@ -1,0 +1,27 @@
+# Core scientific stack
+numpy>=1.26
+scipy>=1.12
+
+# Deep learning
+torch>=2.2
+torchvision>=0.17
+
+# Image processing
+opencv-python>=4.9
+scikit-image>=0.22
+
+# Augmentation
+albumentations>=1.3
+
+# Traditional ML
+scikit-learn>=1.4
+
+# Astronomical data
+astroNN>=1.1
+
+# Visualization
+matplotlib>=3.8
+seaborn>=0.13
+
+# Notebook
+jupyter>=1.0
