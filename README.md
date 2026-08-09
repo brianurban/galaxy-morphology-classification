@@ -115,7 +115,7 @@ A comparative study evaluating deep learning and traditional machine learning ap
 
 Galactic, M., Lam, C., & Leung, N. (2018). *Galaxy10 DECals Dataset*. astroNN. https://github.com/henrysky/astroNN
 
-Walmsley, M. et al. (2022). *Galaxy Zoo DECaLS: Detailed Visual Morphology Measurements from Volunteers and Deep Learning*. MNRAS, 509(3), 3966–3988.
+Walmsley, M. et al. (2022). *Galaxy Zoo DECaLS: Detailed Visual Morphology Measurements from Volunteers and Deep Learning*. MNRAS, 509(3), 3966–3988. https://arxiv.org/abs/2102.08414
 
 <br>
 
