@@ -4,7 +4,7 @@
 # **Author:** Brian Urban
 # **Affiliation:** Jarvis College of Computing and Digital Media, DePaul University
 # **Dataset:** Galaxy10 DECaLS (17,736 images, 10 morphological classes)
-# **Source:** [astroNN](https://astronn.readthedocs.io/en/latest/galaxy10.html)
+# **Source:** [astroNN](https://astronn.readthedocs.io/en/stable/galaxy10.html)
 #
 # <br>
 #
@@ -13,56 +13,56 @@
 # %% [markdown]
 # ## **Table of Contents**
 #
-# - [**Environment Setup and Reproducibility**](#environment-setup-and-reproducibility)
+# [**1) Environment Setup and Reproducibility**](#1-environment-setup-and-reproducibility)
 #
-# - **Deep Learning**
+# **2) Deep Learning**
 #
-# >>> [**1. Load Galaxy10 DECaLS Dataset**](#1-load-galaxy10-decals-dataset)
+# > [**2.1) Load Galaxy10 DECaLS Dataset**](#21-load-galaxy10-decals-dataset)
 #
-# >>> [**2. Train/Validation/Test Split**](#2-trainvalidationtest-split)
+# > [**2.2) Train/Validation/Test Split**](#22-trainvalidationtest-split)
 #
-# >>> [**3. Albumentations Augmentation Pipeline**](#3-albumentations-augmentation-pipeline)
+# > [**2.3) Albumentations Augmentation Pipeline**](#23-albumentations-augmentation-pipeline)
 #
-# >>> [**4. PyTorch Dataset Class**](#4-pytorch-dataset-class)
+# > [**2.4) PyTorch Dataset Class**](#24-pytorch-dataset-class)
 #
-# >>> [**5. DataLoaders**](#5-dataloaders)
+# > [**2.5) DataLoaders**](#25-dataloaders)
 #
-# >>> [**6. EfficientNet-B0 Classification Model**](#6-efficientnet-b0-classification-model)
+# > [**2.6) EfficientNet-B0 Classification Model**](#26-efficientnet-b0-classification-model)
 #
-# >>> [**7. Class Imbalance Handling**](#7-class-imbalance-handling)
+# > [**2.7) Class Imbalance Handling**](#27-class-imbalance-handling)
 #
-# >>> [**8. Optimizer**](#8-optimizer)
+# > [**2.8) Optimizer**](#28-optimizer)
 #
-# >>> [**9. Training Loop**](#9-training-loop)
+# > [**2.9) Training Loop**](#29-training-loop)
 #
-# >>> [**10. Training Curves**](#10-training-curves)
+# > [**2.10) Training Curves**](#210-training-curves)
 #
-# >>> [**11. Test Evaluation**](#11-test-evaluation)
+# > [**2.11) Test Evaluation**](#211-test-evaluation)
 #
-# >>> [**12. Misclassified Examples**](#12-misclassified-examples)
+# > [**2.12) Misclassified Examples**](#212-misclassified-examples)
 #
-# - **Traditional Machine Learning**
+# **3) Traditional Machine Learning**
 #
-# >>> [**1. Preprocessing and Feature Extraction Functions**](#1-preprocessing-and-feature-extraction-functions)
+# > [**3.1) Preprocessing and Feature Extraction Functions**](#31-preprocessing-and-feature-extraction-functions)
 #
-# >>> [**2. Build Feature Matrix for Entire Dataset**](#2-build-feature-matrix-for-entire-dataset)
+# > [**3.2) Build Feature Matrix for Entire Dataset**](#32-build-feature-matrix-for-entire-dataset)
 #
-# >>> [**3. Train/Val/Test Split**](#3-trainvaltest-split)
+# > [**3.3) Train/Val/Test Split**](#33-trainvaltest-split)
 #
-# >>> [**4. PCA Dimensionality Reduction**](#4-pca-dimensionality-reduction)
+# > [**3.4) PCA Dimensionality Reduction**](#34-pca-dimensionality-reduction)
 #
-# >>> [**5. Train ML Models**](#5-train-ml-models)
+# > [**3.5) Train ML Models**](#35-train-ml-models)
 #
-# >>> [**6. Evaluation (Reports + Confusion Matrices)**](#6-evaluation-reports-confusion-matrices)
+# > [**3.6) Evaluation (Reports + Confusion Matrices)**](#36-evaluation-reports-confusion-matrices)
 #
-# - [**Conclusion**](#conclusion)
+# [**4) Conclusion**](#4-conclusion)
 #
 # <br>
 #
 # ---
 
 # %% [markdown]
-# ### **Environment Setup and Reproducibility**
+# ### **1) Environment Setup and Reproducibility**
 #
 # | Package | Purpose |
 # |---------|---------|
@@ -131,9 +131,9 @@ torch.cuda.manual_seed_all(SEED)
 # ---
 
 # %% [markdown]
-# ## **Deep Learning**
+# ## **2) Deep Learning**
 #
-# ### **1. Load Galaxy10 DECaLS Dataset**
+# ### **2.1) Load Galaxy10 DECaLS Dataset**
 #
 # The Galaxy10 DECaLS dataset contains 17,736 RGB galaxy cutouts (256×256) from the DECaLS survey, labeled across 10 morphological categories derived from Galaxy Zoo citizen-science classifications. Raw image data is passed directly to the CNN pipeline, as convolutional architectures learn spatial, structural, and texture-based features automatically — a process that is infeasible to replicate by hand.
 
@@ -175,6 +175,11 @@ ax.set_xlabel("Galaxy Morphology Class")
 ax.set_ylabel("Count")
 ax.set_title("Galaxy10 DECaLS — Class Distribution")
 
+for container in ax.containers:
+    ax.bar_label(container, padding=3, fontsize=9)
+
+ax.margins(y=0.08)
+
 plt.tight_layout()
 plt.show()
 
@@ -206,7 +211,7 @@ plt.show()
 # ---
 
 # %% [markdown]
-# ### **2. Train/Validation/Test Split**
+# ### **2.2) Train/Validation/Test Split**
 #
 # The dataset is partitioned into three stratified subsets:
 #
@@ -263,9 +268,10 @@ for ax, (name, labels_subset) in zip(
     ],
 ):
     counts = np.bincount(labels_subset, minlength=10)
-    ax.bar(
+    bars = ax.bar(
         range(10), counts, color=colors, alpha=0.85, edgecolor="white", linewidth=0.5
     )
+    ax.bar_label(bars, padding=2, fontsize=7, fmt="%d")
     ax.set_title(f"{name} ({len(labels_subset)} samples)", fontsize=11)
     ax.set_xlabel("Class")
     ax.set_xticks(range(10))
@@ -286,13 +292,13 @@ plt.show()
 # ---
 
 # %% [markdown]
-# ### **3. Albumentations Augmentation Pipeline**
+# ### **2.3) Albumentations Augmentation Pipeline**
 #
 # DData augmentation is critical for astronomical imaging because galaxies exhibit no preferred orientation on the sky. The following transforms are applied to the training set only; validation and test sets receive normalization only to ensure unbiased evaluation.
 #
 # | Transform | Justification |
 # |-----------|--------------|
-# | `Normalize` (ImageNet) | Converts [0, 255] → standardized range using ImageNet mean/std |
+# | Normalize (ImageNet) | Converts [0, 255] → standardized range using ImageNet mean/std |
 # | Rotate (±180°) | Galaxies have no intrinsic up/down — rotational symmetry is physically valid |
 # | Horizontal/Vertical Flip | Mirror symmetry applies to most morphological types |
 # | Brightness/Contrast | Simulates varying exposure depths and seeing conditions |
@@ -333,7 +339,7 @@ test_aug = A.Compose(
 # ---
 
 # %% [markdown]
-# ### **4. PyTorch Dataset Class**
+# ### **2.4) PyTorch Dataset Class**
 #
 # A custom `Dataset` class wraps the image arrays and applies the appropriate Albumentations pipeline. Normalization to [0, 1] is handled by `ToFloat` in the augmentation pipeline (Section 3), so the Dataset class only needs to convert from HWC (NumPy) to CHW (PyTorch) tensor format.
 
@@ -397,7 +403,7 @@ for i in range(5):
 # ---
 
 # %% [markdown]
-# ### **5. DataLoaders**
+# ### **2.5) DataLoaders**
 #
 # PyTorch `DataLoader` wraps the `Dataset` objects and provides:
 #
@@ -440,7 +446,7 @@ print(f"Test:  {len(test_dl)} batches × {BATCH_SIZE} = {len(test_ds)} samples")
 # ---
 
 # %% [markdown]
-# ### **6. EfficientNet-B0 Classification Model**
+# ### **2.6) EfficientNet-B0 Classification Model**
 #
 # EfficientNet-B0 uses compound scaling to balance depth, width, and input resolution, achieving strong accuracy with relatively few parameters. It is well-suited for astronomical imaging because:
 #
@@ -483,7 +489,7 @@ print(f"Frozen backbone ratio: {(1 - trainable_params / total_params) * 100:.1f}
 # ---
 
 # %% [markdown]
-# ### **7. Class Imbalance Handling**
+# ### **2.7) Class Imbalance Handling**
 #
 # The Galaxy10 DECaLS dataset exhibits significant class imbalance, with majority classes (e.g., round smooth galaxies) vastly outnumbering minority classes (e.g., disturbed galaxies). To mitigate this, class-weighted cross-entropy loss is used, where each class receives a weight inversely proportional to its frequency in the training set.
 #
@@ -513,7 +519,7 @@ for i, name in enumerate(CLASS_NAMES):
 # ---
 
 # %% [markdown]
-# ### **8. Optimizer & Learning Rate Scheduler**
+# ### **2.8) Optimizer & Learning Rate Scheduler**
 #
 # The Adam optimizer adapts per-parameter learning rates using moving averages of gradients and squared gradients, making it well-suited for transfer learning where different layers benefit from different update magnitudes.
 #
@@ -550,7 +556,7 @@ print("Scheduler: ReduceLROnPlateau (factor=0.5, patience=2)")
 # ---
 
 # %% [markdown]
-# ### **9. Training Loop**
+# ### **2.9) Training Loop**
 #
 # The training loop iterates over epochs, performing the following steps each cycle:
 #
@@ -674,7 +680,7 @@ print(f"\n✓ Best model restored (validation accuracy: {best_val_acc:.4f})")
 # ---
 
 # %% [markdown]
-# ### **10. Training Curves**
+# ### **2.10) Training Curves**
 #
 # The plots below track loss and accuracy across training epochs for both the training and validation sets. Comparing these curves reveals:
 #
@@ -727,7 +733,7 @@ plt.show()
 # ---
 
 # %% [markdown]
-# ### **11. Test Evaluation**
+# ### **2.11) Test Evaluation**
 #
 # The test set contains data the model has never encountered during training or hyperparameter tuning, providing an unbiased estimate of real-world performance.
 #
@@ -757,8 +763,8 @@ all_preds = np.array(all_preds)
 all_labels = np.array(all_labels)
 
 # Overall accuracy
-test_acc = (all_preds == all_labels).mean()
-print(f"Test Accuracy: {test_acc:.4f}\n")
+cnn_test_acc = (all_preds == all_labels).mean()
+print(f"Test Accuracy: {cnn_test_acc:.4f}\n")
 
 # %%
 # Per-class precision, recall, and F1-score
@@ -803,7 +809,7 @@ plt.show()
 # ---
 
 # %% [markdown]
-# ### **12. Misclassified Examples**
+# ### **2.12) Misclassified Examples**
 #
 # Inspecting individual misclassifications provides qualitative insight into the model's limitations. The plots below display randomly sampled test set images where the predicted class differs from the true label, along with the predicted and true class names.
 #
@@ -859,9 +865,9 @@ plt.show()
 # ---
 
 # %% [markdown]
-# ## **Traditional Machine Learning**
+# ## **3) Traditional Machine Learning**
 #
-# ### **1. Preprocessing and Feature Extraction Functions**
+# ### **3.1) Preprocessing and Feature Extraction Functions**
 #
 # Traditional ML relies on hand-crafted features that encode domain-specific morphological descriptors. The following features are extracted from each galaxy image:
 #
@@ -974,7 +980,7 @@ print("Breakdown: Haralick=6, Shape=7, Hu=7, Color=6, Edges=2 → Total=28")
 # ---
 
 # %% [markdown]
-# ### **2. Build Feature Matrix for Entire Dataset**
+# ### **3.2) Build Feature Matrix for Entire Dataset**
 #
 # The feature extraction functions are applied to every image in the dataset to construct a feature matrix where each row represents one galaxy and each column represents one morphological descriptor. A corresponding label vector preserves the Galaxy10 DECaLS class assignments.
 #
@@ -1004,7 +1010,7 @@ print(f"Total features per image: {X_feat.shape[1]}")
 # ---
 
 # %% [markdown]
-# ### **3. Train/Val/Test Split**
+# ### **3.3) Train/Val/Test Split**
 #
 # The feature matrix is split using the same stratified 70/15/15 partition as the deep learning pipeline, ensuring a direct and fair comparison between both approaches. The same `random_state=42` is used so that identical images appear in each subset across both pipelines.
 
@@ -1034,7 +1040,7 @@ print("Split ratio: 70% / 15% / 15%")
 # ---
 
 # %% [markdown]
-# ### **4. Feature Scaling and PCA Dimensionality Reduction**
+# ### **3.4) Feature Scaling and PCA Dimensionality Reduction**
 #
 # The hand-crafted features span vastly different numerical scales — for example, color means range in the hundreds while Haralick correlation values fall between 0 and 1. Applying PCA without prior standardization causes high-variance features to dominate, collapsing the projection onto a single axis and destroying discriminative information.
 #
@@ -1091,7 +1097,7 @@ plt.show()
 # ---
 
 # %% [markdown]
-# ### **5. Train ML Models**
+# ### **3.5) Train ML Models**
 #
 # Four classical classifiers are trained on the PCA-reduced feature matrix:
 #
@@ -1157,7 +1163,7 @@ for name, model in models.items():
 # ---
 
 # %% [markdown]
-# ### **6. Model Comparison**
+# ### **3.6) Model Comparison**
 #
 # The bar chart below compares test accuracy across all traditional ML models and the EfficientNet-B0 CNN. This visualization directly illustrates the performance gap between hand-crafted feature engineering and learned spatial representations for galaxy morphology classification.
 
@@ -1165,10 +1171,16 @@ for name, model in models.items():
 # Collect all test accuracies
 model_names = list(results.keys())
 test_accs = [results[name]["test"] for name in model_names]
+from pickle import TRUE
 
 # Add CNN accuracy
+assert "cnn_test_acc" in dir(), "Run the EfficientNet-B0 evaluation cell first"
 model_names.append("EfficientNet-B0")
-test_accs.append(test_acc)  # From Section 11
+test_accs.append(cnn_test_acc)
+
+# Sort models by test accuracy, highest to lowest
+paired = sorted(zip(model_names, test_accs), key=lambda pair: pair[1], reverse=True)
+model_names, test_accs = zip(*paired)
 
 # Plot
 colors = plt.cm.viridis(np.linspace(0, 1, len(model_names)))
@@ -1208,10 +1220,10 @@ plt.show()
 #
 # | Approach | Model(s) Used | Test Accuracy | Strengths | Weaknesses |
 # |----------|---------------|---------------|-----------|------------|
-# | **Deep Learning** | EfficientNet-B0 (transfer learning) | **~31.6%** (5-epoch CPU run) | Learns complex spatial features directly from pixels; scalable with more training | Requires GPU for practical training; longer runtime; less interpretable |
 # | **Traditional ML** | SVM (RBF) | **36.8%** | Fast training; interpretable features; no GPU needed | Struggles with rare classes; limited by feature engineering quality |
 # | **Traditional ML** | RandomForest | **35.9%** | Robust to noise; handles nonlinear interactions | Severe overfitting (99.8% train acc); poor generalization |
 # | **Traditional ML** | ExtraTrees | **34.5%** | Reduced variance via randomized splits | Similar overfitting issues as RandomForest |
+# | **Deep Learning** | EfficientNet-B0 (transfer learning) | **31.8%** (5-epoch CPU run) | Learns complex spatial features directly from pixels; scalable with more training | Requires GPU for practical training; longer runtime; less interpretable |
 # | **Traditional ML** | kNN | **25.9%** | Simple distance-based approach | Sensitive to irrelevant features; worst performer |
 #
 # <br>
@@ -1234,7 +1246,7 @@ plt.show()
 # ---
 
 # %% [markdown]
-# ## **Conclusion**
+# ## **4) Conclusion**
 #
 # This project compared two approaches to galaxy morphology classification using the Galaxy10 DECaLS dataset: deep learning with EfficientNet-B0 transfer learning, and traditional machine learning using hand-crafted morphological features (Haralick textures, Hu moments, shape moments, color statistics, and edge intensity) with PCA dimensionality reduction.
 #
