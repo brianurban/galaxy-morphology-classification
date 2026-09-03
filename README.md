@@ -173,11 +173,12 @@ A comparative study evaluating deep learning and traditional machine learning ap
 ## Tech Stack
 
 ![Python](https://img.shields.io/badge/Python-3776ab?logo=python&logoColor=white)
-![NumPy](https://img.shields.io/badge/NumPy-4DABCF?logo=numpy&logoColor=fff)
+![AlbumentationsX](https://custom-icon-badges.demolab.com/badge/AlbumentationsX-ff0101?logo=albumentationsx&logoColor=fff)
+![NumPy](https://img.shields.io/badge/NumPy-4dabcf?logo=numpy&logoColor=fff)
 ![PyTorch](https://img.shields.io/badge/PyTorch-ee4c2c?logo=pytorch&logoColor=fff)
-![scikit-learn](https://img.shields.io/badge/-scikit--learn-%23F7931E?logo=scikit-learn&logoColor=fff)
-![Matplotlib](https://custom-icon-badges.demolab.com/badge/Matplotlib-71D291?logo=matplotlib&logoColor=fff)
-![Seaborn](https://img.shields.io/badge/Seaborn-4EAEAA?logo=python&logoColor=fff)
+![scikit-learn](https://img.shields.io/badge/-scikit--learn-%23f7931e?logo=scikit-learn&logoColor=fff)
+![Matplotlib](https://custom-icon-badges.demolab.com/badge/Matplotlib-71d291?logo=matplotlib&logoColor=fff)
+![Seaborn](https://img.shields.io/badge/Seaborn-4eAeaa?logo=python&logoColor=fff)
 ![OpenCV](https://img.shields.io/badge/OpenCV-5c3ee8?logo=opencv&logoColor=white)
 
 ---
