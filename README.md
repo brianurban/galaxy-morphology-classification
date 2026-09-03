@@ -90,8 +90,8 @@ A comparative study evaluating deep learning and traditional machine learning ap
 | 1 | SVM (RBF) | Traditional ML | **36.8%** | 0.30 | 0.35 | Low |
 | 2 | RandomForest | Traditional ML | 35.9% | 0.30 | 0.34 | Severe (99.8% train) |
 | 3 | ExtraTrees | Traditional ML | 34.5% | 0.29 | 0.33 | Severe (99.8% train) |
-| 4 | kNN | Traditional ML | 25.9% | 0.23 | 0.26 | Moderate |
-| 5 | EfficientNet-B0 | Deep Learning | 25.9% | 0.26 | 0.28 | Low (frozen backbone) |
+| 4 | EfficientNet-B0 | Deep Learning | 31.8% | 0.26 | 0.30 | Low (frozen backbone) |
+| 5 | kNN | Traditional ML | 25.9% | 0.23 | 0.26 | Moderate |
 
 *Test accuracy computed on held-out test set (2,661 samples). EfficientNet-B0 trained for 5 epochs on CPU with frozen backbone—preliminary baseline, not fully converged.*
 
