@@ -4,7 +4,7 @@
 # **Author:** Brian Urban
 # **Affiliation:** Jarvis College of Computing and Digital Media, DePaul University
 # **Dataset:** Galaxy10 DECaLS (17,736 images, 10 morphological classes)
-# **Source:** astroNN / Galaxy Zoo
+# **Source:** [astroNN](https://astronn.readthedocs.io/en/latest/galaxy10.html)
 #
 # <br>
 #
@@ -17,43 +17,43 @@
 #
 # - **Deep Learning**
 #
-# >> [**1. Load Galaxy10 DECaLS Dataset**](#1-load-galaxy10-decals-dataset)
+# >>> [**1. Load Galaxy10 DECaLS Dataset**](#1-load-galaxy10-decals-dataset)
 #
-# >> [**2. Train/Validation/Test Split**](#2-trainvalidationtest-split)
+# >>> [**2. Train/Validation/Test Split**](#2-trainvalidationtest-split)
 #
-# >> [**3. Albumentations Augmentation Pipeline**](#3-albumentations-augmentation-pipeline)
+# >>> [**3. Albumentations Augmentation Pipeline**](#3-albumentations-augmentation-pipeline)
 #
-# >> [**4. PyTorch Dataset Class**](#4-pytorch-dataset-class)
+# >>> [**4. PyTorch Dataset Class**](#4-pytorch-dataset-class)
 #
-# >> [**5. DataLoaders**](#5-dataloaders)
+# >>> [**5. DataLoaders**](#5-dataloaders)
 #
-# >> [**6. EfficientNet-B0 Classification Model**](#6-efficientnet-b0-classification-model)
+# >>> [**6. EfficientNet-B0 Classification Model**](#6-efficientnet-b0-classification-model)
 #
-# >> [**7. Class Imbalance Handling**](#7-class-imbalance-handling)
+# >>> [**7. Class Imbalance Handling**](#7-class-imbalance-handling)
 #
-# >> [**8. Optimizer**](#8-optimizer)
+# >>> [**8. Optimizer**](#8-optimizer)
 #
-# >> [**9. Training Loop**](#9-training-loop)
+# >>> [**9. Training Loop**](#9-training-loop)
 #
-# >> [**10. Training Curves**](#10-training-curves)
+# >>> [**10. Training Curves**](#10-training-curves)
 #
-# >> [**11. Test Evaluation**](#11-test-evaluation)
+# >>> [**11. Test Evaluation**](#11-test-evaluation)
 #
-# >> [**12. Misclassified Examples**](#12-misclassified-examples)
+# >>> [**12. Misclassified Examples**](#12-misclassified-examples)
 #
 # - **Traditional Machine Learning**
 #
-# >> [**1. Preprocessing and Feature Extraction Functions**](#1-preprocessing-and-feature-extraction-functions)
+# >>> [**1. Preprocessing and Feature Extraction Functions**](#1-preprocessing-and-feature-extraction-functions)
 #
-# >> [**2. Build Feature Matrix for Entire Dataset**](#2-build-feature-matrix-for-entire-dataset)
+# >>> [**2. Build Feature Matrix for Entire Dataset**](#2-build-feature-matrix-for-entire-dataset)
 #
-# >> [**3. Train/Val/Test Split**](#3-trainvaltest-split)
+# >>> [**3. Train/Val/Test Split**](#3-trainvaltest-split)
 #
-# >> [**4. PCA Dimensionality Reduction**](#4-pca-dimensionality-reduction)
+# >>> [**4. PCA Dimensionality Reduction**](#4-pca-dimensionality-reduction)
 #
-# >> [**5. Train ML Models**](#5-train-ml-models)
+# >>> [**5. Train ML Models**](#5-train-ml-models)
 #
-# >> [**6. Evaluation (Reports + Confusion Matrices)**](#6-evaluation-reports-confusion-matrices)
+# >>> [**6. Evaluation (Reports + Confusion Matrices)**](#6-evaluation-reports-confusion-matrices)
 #
 # - [**Conclusion**](#conclusion)
 #
@@ -84,37 +84,29 @@
 # ============================================================
 # IMPORTING LIBRARIES
 # ============================================================
-import numpy as np
-from pathlib import Path
-import os
 import random
-
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-from astroNN.datasets import load_galaxy10
-
-import torch
-import torch.nn as nn
-from torch.utils.data import DataLoader, Dataset
-from torchvision import models
+import warnings
 
 import albumentations as A
-
-from sklearn.model_selection import train_test_split
-from sklearn.utils.class_weight import compute_class_weight
-from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
-from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
-from sklearn.svm import SVC
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.exceptions import UndefinedMetricWarning
-
 import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+import torch
+from astroNN.datasets import load_galaxy10
 from skimage.feature import graycomatrix, graycoprops
-
-import warnings
+from sklearn.decomposition import PCA
+from sklearn.ensemble import ExtraTreesClassifier, RandomForestClassifier
+from sklearn.exceptions import UndefinedMetricWarning
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.utils.class_weight import compute_class_weight
+from torch import nn
+from torch.utils.data import DataLoader, Dataset
+from torchvision import models
 
 warnings.filterwarnings("ignore")
 
@@ -183,14 +175,7 @@ ax.set_xlabel("Galaxy Morphology Class")
 ax.set_ylabel("Count")
 ax.set_title("Galaxy10 DECaLS — Class Distribution")
 
-FIGURES_DIR = Path.home() / "Desktop" / "galaxy-figures"
-os.makedirs(FIGURES_DIR, exist_ok=True)
-
 plt.tight_layout()
-plt.savefig(
-    str(FIGURES_DIR / "01-class-distribution.png"), dpi=300, bbox_inches="tight"
-)
-print(f"✅ Saved to {FIGURES_DIR}")
 plt.show()
 
 # %% [markdown]
@@ -210,14 +195,7 @@ for cls in range(10):
     axes[row, col].axis("off")
 plt.suptitle("Sample Galaxy Images — One Per Class", fontsize=13)
 
-FIGURES_DIR = Path.home() / "Desktop" / "galaxy-figures"
-os.makedirs(FIGURES_DIR, exist_ok=True)
-
 plt.tight_layout()
-plt.savefig(
-    str(FIGURES_DIR / "02-sample-galaxy-images.png"), dpi=300, bbox_inches="tight"
-)
-print(f"✅ Saved to {FIGURES_DIR}")
 plt.show()
 
 # %% [markdown]
@@ -297,16 +275,7 @@ for ax, (name, labels_subset) in zip(
 
 plt.suptitle("Class Distribution Across Splits", fontsize=13, fontweight="bold")
 
-FIGURES_DIR = Path.home() / "Desktop" / "galaxy-figures"
-os.makedirs(FIGURES_DIR, exist_ok=True)
-
 plt.tight_layout()
-plt.savefig(
-    str(FIGURES_DIR / "03-class-distribution-across-splits.png"),
-    dpi=300,
-    bbox_inches="tight",
-)
-print(f"✅ Saved to {FIGURES_DIR}")
 plt.show()
 
 # %% [markdown]
@@ -747,16 +716,7 @@ axes[1].grid(True, alpha=0.3)
 
 plt.suptitle("EfficientNet-B0 Training History", fontsize=13, fontweight="bold")
 
-FIGURES_DIR = Path.home() / "Desktop" / "galaxy-figures"
-os.makedirs(FIGURES_DIR, exist_ok=True)
-
 plt.tight_layout()
-plt.savefig(
-    str(FIGURES_DIR / "04-efficientnet-b0-training-history.png"),
-    dpi=300,
-    bbox_inches="tight",
-)
-print(f"✅ Saved to {FIGURES_DIR}")
 plt.show()
 
 # %% [markdown]
@@ -832,12 +792,7 @@ ax.set_title(
 plt.xticks(rotation=45, ha="right")
 plt.yticks(rotation=0)
 
-FIGURES_DIR = Path.home() / "Desktop" / "galaxy-figures"
-os.makedirs(FIGURES_DIR, exist_ok=True)
-
 plt.tight_layout()
-plt.savefig(str(FIGURES_DIR / "05-confusion-matrix.png"), dpi=300, bbox_inches="tight")
-print(f"✅ Saved to {FIGURES_DIR}")
 plt.show()
 
 # %% [markdown]
@@ -893,16 +848,7 @@ for i, idx in enumerate(sample_idx):
 
 plt.suptitle("Misclassified Galaxy Images (Test Set)", fontsize=13, fontweight="bold")
 
-FIGURES_DIR = Path.home() / "Desktop" / "galaxy-figures"
-os.makedirs(FIGURES_DIR, exist_ok=True)
-
 plt.tight_layout()
-plt.savefig(
-    str(FIGURES_DIR / "06-misclassified-galaxy-images.png"),
-    dpi=300,
-    bbox_inches="tight",
-)
-print(f"✅ Saved to {FIGURES_DIR}")
 plt.show()
 
 # %% [markdown]
@@ -1134,14 +1080,7 @@ ax.set_title("PCA Explained Variance", fontsize=13, fontweight="bold")
 ax.legend()
 ax.grid(True, alpha=0.3)
 
-FIGURES_DIR = Path.home() / "Desktop" / "galaxy-figures"
-os.makedirs(FIGURES_DIR, exist_ok=True)
-
 plt.tight_layout()
-plt.savefig(
-    str(FIGURES_DIR / "07-pca-explained-variance.png"), dpi=300, bbox_inches="tight"
-)
-print(f"✅ Saved to {FIGURES_DIR}")
 plt.show()
 
 # %% [markdown]
@@ -1261,12 +1200,7 @@ ax.set_ylim(0, 1.0)
 ax.grid(axis="y", alpha=0.3)
 plt.xticks(rotation=30, ha="right")
 
-FIGURES_DIR = Path.home() / "Desktop" / "galaxy-figures"
-os.makedirs(FIGURES_DIR, exist_ok=True)
-
 plt.tight_layout()
-plt.savefig(str(FIGURES_DIR / "08-model-comparison.png"), dpi=300, bbox_inches="tight")
-print(f"✅ Saved to {FIGURES_DIR}")
 plt.show()
 
 # %% [markdown]
