@@ -1,9 +1,9 @@
 # %% [markdown]
 # # **Galaxy Morphology Classification Using Machine Learning**
 #
-# **Author:** Brian Urban
-# **Affiliation:** Jarvis College of Computing and Digital Media, DePaul University
-# **Dataset:** Galaxy10 DECaLS (17,736 images, 10 morphological classes)
+# **Author:** Brian Urban   
+# **Affiliation:** Jarvis College of Computing and Digital Media, DePaul University   
+# **Dataset:** Galaxy10 DECaLS (17,736 images, 10 morphological classes)   
 # **Source:** [astroNN](https://astronn.readthedocs.io/en/stable/galaxy10.html)
 #
 # <br>
@@ -17,43 +17,43 @@
 #
 # **2) Deep Learning**
 #
-# > [**2.1) Load Galaxy10 DECaLS Dataset**](#21-load-galaxy10-decals-dataset)
+# - [**2.1) Load Galaxy10 DECaLS Dataset**](#21-load-galaxy10-decals-dataset)
 #
-# > [**2.2) Train/Validation/Test Split**](#22-trainvalidationtest-split)
+# - [**2.2) Train/Validation/Test Split**](#22-trainvalidationtest-split)
 #
-# > [**2.3) Albumentations Augmentation Pipeline**](#23-albumentations-augmentation-pipeline)
+# - [**2.3) Albumentations Augmentation Pipeline**](#23-albumentations-augmentation-pipeline)
 #
-# > [**2.4) PyTorch Dataset Class**](#24-pytorch-dataset-class)
+# - [**2.4) PyTorch Dataset Class**](#24-pytorch-dataset-class)
 #
-# > [**2.5) DataLoaders**](#25-dataloaders)
+# - [**2.5) DataLoaders**](#25-dataloaders)
 #
-# > [**2.6) EfficientNet-B0 Classification Model**](#26-efficientnet-b0-classification-model)
+# - [**2.6) EfficientNet-B0 Classification Model**](#26-efficientnet-b0-classification-model)
 #
-# > [**2.7) Class Imbalance Handling**](#27-class-imbalance-handling)
+# - [**2.7) Class Imbalance Handling**](#27-class-imbalance-handling)
 #
-# > [**2.8) Optimizer**](#28-optimizer)
+# - [**2.8) Optimizer**](#28-optimizer)
 #
-# > [**2.9) Training Loop**](#29-training-loop)
+# - [**2.9) Training Loop**](#29-training-loop)
 #
-# > [**2.10) Training Curves**](#210-training-curves)
+# - [**2.10) Training Curves**](#210-training-curves)
 #
-# > [**2.11) Test Evaluation**](#211-test-evaluation)
+# - [**2.11) Test Evaluation**](#211-test-evaluation)
 #
-# > [**2.12) Misclassified Examples**](#212-misclassified-examples)
+# - [**2.12) Misclassified Examples**](#212-misclassified-examples)
 #
 # **3) Traditional Machine Learning**
 #
-# > [**3.1) Preprocessing and Feature Extraction Functions**](#31-preprocessing-and-feature-extraction-functions)
+# - [**3.1) Preprocessing and Feature Extraction Functions**](#31-preprocessing-and-feature-extraction-functions)
 #
-# > [**3.2) Build Feature Matrix for Entire Dataset**](#32-build-feature-matrix-for-entire-dataset)
+# - [**3.2) Build Feature Matrix for Entire Dataset**](#32-build-feature-matrix-for-entire-dataset)
 #
-# > [**3.3) Train/Val/Test Split**](#33-trainvaltest-split)
+# - [**3.3) Train/Val/Test Split**](#33-trainvaltest-split)
 #
-# > [**3.4) PCA Dimensionality Reduction**](#34-pca-dimensionality-reduction)
+# - [**3.4) PCA Dimensionality Reduction**](#34-pca-dimensionality-reduction)
 #
-# > [**3.5) Train ML Models**](#35-train-ml-models)
+# - [**3.5) Train ML Models**](#35-train-ml-models)
 #
-# > [**3.6) Evaluation (Reports + Confusion Matrices)**](#36-evaluation-reports-confusion-matrices)
+# - [**3.6) Evaluation (Reports + Confusion Matrices)**](#36-evaluation-reports-confusion-matrices)
 #
 # [**4) Conclusion**](#4-conclusion)
 #
@@ -152,7 +152,7 @@ CLASS_NAMES = [
     "Unbarred Tight Spiral Galaxies",
     "Unbarred Loose Spiral Galaxies",
     "Edge-on Galaxies without Bulge",
-    "Edge-on Galaxies with Bulge",
+    "Edge-on Galaxies with Bulge"
 ]
 
 # Quick sanity check
@@ -246,7 +246,7 @@ del X_temp, y_temp
 print(f"Training:   {X_train.shape}  ({len(y_train)} samples)")
 print(f"Validation: {X_val.shape}  ({len(y_val)} samples)")
 print(f"Test:       {X_test.shape}  ({len(y_test)} samples)")
-print("Split ratio: 70% / 15% / 15%")
+print('Split ratio: 70% / 15% / 15%')
 
 # %% [markdown]
 # <br>
@@ -259,18 +259,13 @@ print("Split ratio: 70% / 15% / 15%")
 fig, axes = plt.subplots(1, 3, figsize=(18, 5), sharey=True)
 colors = plt.cm.viridis(np.linspace(0, 1, 10))
 
-for ax, (name, labels_subset) in zip(
-    axes,
-    [
-        ("Training", y_train),
-        ("Validation", y_val),
-        ("Test", y_test),
-    ],
-):
+for ax, (name, labels_subset) in zip(axes, [
+    ("Training", y_train),
+    ("Validation", y_val),
+    ("Test", y_test),
+]):
     counts = np.bincount(labels_subset, minlength=10)
-    bars = ax.bar(
-        range(10), counts, color=colors, alpha=0.85, edgecolor="white", linewidth=0.5
-    )
+    bars = ax.bar(range(10), counts, color=colors, alpha=0.85, edgecolor="white", linewidth=0.5)
     ax.bar_label(bars, padding=2, fontsize=7, fmt="%d")
     ax.set_title(f"{name} ({len(labels_subset)} samples)", fontsize=11)
     ax.set_xlabel("Class")
@@ -306,30 +301,24 @@ plt.show()
 
 # %%
 # Training augmentations: ImageNet normalization + geometric/intensity transforms
-train_aug = A.Compose(
-    [
-        A.Rotate(limit=180, p=0.5),
-        A.HorizontalFlip(p=0.5),
-        A.VerticalFlip(p=0.5),
-        A.RandomBrightnessContrast(p=0.3),
-        A.RandomResizedCrop(size=(256, 256), scale=(0.8, 1.0), p=0.5),
-        A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ]
-)
+train_aug = A.Compose([
+    A.Rotate(limit=180, p=0.5),
+    A.HorizontalFlip(p=0.5),
+    A.VerticalFlip(p=0.5),
+    A.RandomBrightnessContrast(p=0.3),
+    A.RandomResizedCrop(size=(256, 256), scale=(0.8, 1.0), p=0.5),
+    A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+])
 
 # Validation: ImageNet normalization only
-val_aug = A.Compose(
-    [
-        A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ]
-)
+val_aug = A.Compose([
+    A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+])
 
 # Test: ImageNet normalization only
-test_aug = A.Compose(
-    [
-        A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ]
-)
+test_aug = A.Compose([
+    A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+])
 
 # %% [markdown]
 # [**⬆ Back to Table of Contents**](#table-of-contents)
@@ -342,7 +331,6 @@ test_aug = A.Compose(
 # ### **2.4) PyTorch Dataset Class**
 #
 # A custom `Dataset` class wraps the image arrays and applies the appropriate Albumentations pipeline. Normalization to [0, 1] is handled by `ToFloat` in the augmentation pipeline (Section 3), so the Dataset class only needs to convert from HWC (NumPy) to CHW (PyTorch) tensor format.
-
 
 # %%
 class GalaxyDataset(Dataset):
@@ -359,10 +347,10 @@ class GalaxyDataset(Dataset):
         self.images = images
         self.labels = labels
         self.augmentations = augmentations
-
+        
     def __len__(self):
         return len(self.images)
-
+    
     def __getitem__(self, idx):
         img = self.images[idx]
         label = self.labels[idx]
@@ -373,9 +361,8 @@ class GalaxyDataset(Dataset):
 
         # Convert HWC → CHW for PyTorch convolutional layers
         img = torch.from_numpy(img).permute(2, 0, 1).float()
-
+        
         return img, torch.tensor(label, dtype=torch.long)
-
 
 # %%
 # Verify normalization is correct
@@ -391,9 +378,7 @@ print(f"Label dtype: {sample_label.dtype}")
 dataset = GalaxyDataset(X_train[:5], y_train[:5], augmentations=train_aug)
 for i in range(5):
     img, label = dataset[i]
-    print(
-        f"Sample {i}: range [{img.min():.4f}, {img.max():.4f}]  | label: {label.item()}"
-    )
+    print(f"Sample {i}: range [{img.min():.4f}, {img.max():.4f}]  | label: {label.item()}")
 
 # %% [markdown]
 # [**⬆ Back to Table of Contents**](#table-of-contents)
@@ -418,21 +403,15 @@ for i in range(5):
 # %%
 # Create Dataset objects for each split
 train_ds = GalaxyDataset(X_train, y_train, augmentations=train_aug)
-val_ds = GalaxyDataset(X_val, y_val, augmentations=val_aug)
-test_ds = GalaxyDataset(X_test, y_test, augmentations=test_aug)
+val_ds   = GalaxyDataset(X_val,   y_val,   augmentations=val_aug)
+test_ds  = GalaxyDataset(X_test,  y_test,  augmentations=test_aug)
 
 # Create DataLoaders
 BATCH_SIZE = 32
 
-train_dl = DataLoader(
-    train_ds, batch_size=BATCH_SIZE, shuffle=True, num_workers=0, pin_memory=True
-)
-val_dl = DataLoader(
-    val_ds, batch_size=BATCH_SIZE, shuffle=False, num_workers=0, pin_memory=True
-)
-test_dl = DataLoader(
-    test_ds, batch_size=BATCH_SIZE, shuffle=False, num_workers=0, pin_memory=True
-)
+train_dl = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True,  num_workers=0, pin_memory=True)
+val_dl   = DataLoader(val_ds,   batch_size=BATCH_SIZE, shuffle=False, num_workers=0, pin_memory=True)
+test_dl  = DataLoader(test_ds,  batch_size=BATCH_SIZE, shuffle=False, num_workers=0, pin_memory=True)
 
 print(f"Train: {len(train_dl)} batches × {BATCH_SIZE} = {len(train_ds)} samples")
 print(f"Val:   {len(val_dl)} batches × {BATCH_SIZE} = {len(val_ds)} samples")
@@ -479,7 +458,7 @@ total_params = sum(p.numel() for p in model.parameters())
 trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 print(f"Total parameters:      {total_params:,}")
 print(f"Trainable parameters:  {trainable_params:,}")
-print(f"Frozen backbone ratio: {(1 - trainable_params / total_params) * 100:.1f}%")
+print(f"Frozen backbone ratio: {(1 - trainable_params/total_params)*100:.1f}%")
 
 # %% [markdown]
 # [**⬆ Back to Table of Contents**](#table-of-contents)
@@ -498,7 +477,9 @@ print(f"Frozen backbone ratio: {(1 - trainable_params / total_params) * 100:.1f}
 # %%
 # Compute class weights inversely proportional to frequency
 class_weights = compute_class_weight(
-    class_weight="balanced", classes=np.unique(y_train), y=y_train
+    class_weight="balanced",
+    classes=np.unique(y_train),
+    y=y_train
 )
 
 class_weights = torch.tensor(class_weights, dtype=torch.float).to(device)
@@ -535,18 +516,21 @@ for i, name in enumerate(CLASS_NAMES):
 # %%
 # Adam optimizer with weight decay for L2 regularization
 optimizer = torch.optim.Adam(
-    filter(lambda p: p.requires_grad, model.parameters()), lr=1e-4, weight_decay=1e-4
+    filter(lambda p: p.requires_grad, model.parameters()),
+    lr=1e-4,
+    weight_decay=1e-4
 )
 
 # Reduce learning rate when validation accuracy plateaus
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-    optimizer, mode="max", factor=0.5, patience=2
+    optimizer,
+    mode="max",
+    factor=0.5,
+    patience=2
 )
 
-print(
-    f"Optimizer: Adam | LR: {optimizer.param_groups[0]['lr']} | WD: {optimizer.param_groups[0]['weight_decay']}"
-)
-print("Scheduler: ReduceLROnPlateau (factor=0.5, patience=2)")
+print(f"Optimizer: Adam | LR: {optimizer.param_groups[0]['lr']} | WD: {optimizer.param_groups[0]['weight_decay']}")
+print('Scheduler: ReduceLROnPlateau (factor=0.5, patience=2)')
 
 # %% [markdown]
 # [**⬆ Back to Table of Contents**](#table-of-contents)
@@ -572,13 +556,12 @@ print("Scheduler: ReduceLROnPlateau (factor=0.5, patience=2)")
 #
 # Training and validation loss/accuracy are tracked across all epochs for visualization in Section 10.
 
-
 # %%
 def train_epoch(model, loader, optimizer, criterion):
     """Train for one epoch. Returns (average_loss, accuracy)."""
     model.train()
     total, correct, loss_sum = 0, 0, 0.0
-
+    
     for imgs, lbls in loader:
         imgs, lbls = imgs.to(device), lbls.to(device)
 
@@ -614,7 +597,6 @@ def eval_epoch(model, loader, criterion):
 
     return loss_sum / total, correct / total
 
-
 # %%
 # Training configuration
 EPOCHS = 5
@@ -626,28 +608,26 @@ best_val_acc = 0.0
 best_model_wts = None
 patience_counter = 0
 
-print(
-    f"Training for up to {EPOCHS} epochs (early stopping after {PATIENCE} stagnant epochs)\n"
-)
+print(f"Training for up to {EPOCHS} epochs (early stopping after {PATIENCE} stagnant epochs)\n")
 
 for epoch in range(EPOCHS):
     print(f"Epoch {epoch + 1}/{EPOCHS}")
-
+    
     # Train
     train_loss, train_acc = train_epoch(model, train_dl, optimizer, criterion)
-
+    
     # Validate
     val_loss, val_acc = eval_epoch(model, val_dl, criterion)
-
+    
     # Step the scheduler based on validation accuracy
     scheduler.step(val_acc)
-
+    
     # Record history
     history["train_loss"].append(train_loss)
     history["train_acc"].append(train_acc)
     history["val_loss"].append(val_loss)
     history["val_acc"].append(val_acc)
-
+    
     # Best model checkpointing
     if val_acc > best_val_acc:
         best_val_acc = val_acc
@@ -656,13 +636,13 @@ for epoch in range(EPOCHS):
         print(f"  ★ New best validation accuracy: {val_acc:.4f}")
     else:
         patience_counter += 1
-
+    
     current_lr = optimizer.param_groups[0]["lr"]
     print(f"  Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.4f}")
     print(f"  Val   Loss: {val_loss:.4f} | Val   Acc: {val_acc:.4f}")
     print(f"  LR: {current_lr:.6f} | Patience: {patience_counter}/{PATIENCE}")
     print()
-
+    
     # Early stopping
     if patience_counter >= PATIENCE:
         print(f"⏹ Early stopping triggered at epoch {epoch + 1}")
@@ -699,9 +679,7 @@ fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 axes[0].plot(history["train_loss"], label="Train", marker="o", markersize=3)
 axes[0].plot(history["val_loss"], label="Validation", marker="s", markersize=3)
 best_epoch = history["val_acc"].index(max(history["val_acc"]))
-axes[0].axvline(
-    x=best_epoch, color="gray", linestyle="--", alpha=0.7, label="Best Epoch"
-)
+axes[0].axvline(x=best_epoch, color="gray", linestyle="--", alpha=0.7, label="Best Epoch")
 axes[0].set_xlabel("Epoch")
 axes[0].set_ylabel("Loss")
 axes[0].set_title("Training & Validation Loss", fontsize=12)
@@ -711,9 +689,7 @@ axes[0].grid(True, alpha=0.3)
 # Accuracy curves
 axes[1].plot(history["train_acc"], label="Train", marker="o", markersize=3)
 axes[1].plot(history["val_acc"], label="Validation", marker="s", markersize=3)
-axes[1].axvline(
-    x=best_epoch, color="gray", linestyle="--", alpha=0.7, label="Best Epoch"
-)
+axes[1].axvline(x=best_epoch, color="gray", linestyle="--", alpha=0.7, label="Best Epoch")
 axes[1].set_xlabel("Epoch")
 axes[1].set_ylabel("Accuracy")
 axes[1].set_title("Training & Validation Accuracy", fontsize=12)
@@ -735,7 +711,7 @@ plt.show()
 # %% [markdown]
 # ### **2.11) Test Evaluation**
 #
-# The test set contains data the model has never encountered during training or hyperparameter tuning, providing an unbiased estimate of real-world performance.
+# The test set contains data the model has never encountered during training or hyperparameter tuning, providing an unbiased estimate of real-world performance. 
 #
 # The following metrics are computed:
 #
@@ -769,11 +745,12 @@ print(f"Test Accuracy: {cnn_test_acc:.4f}\n")
 # %%
 # Per-class precision, recall, and F1-score
 print("Classification Report:")
-print(
-    classification_report(
-        all_labels, all_preds, target_names=CLASS_NAMES, zero_division=0
-    )
-)
+print(classification_report(
+    all_labels, 
+    all_preds, 
+    target_names=CLASS_NAMES,
+    zero_division=0
+))
 
 # %%
 # Confusion matrix
@@ -781,20 +758,18 @@ cm = confusion_matrix(all_labels, all_preds)
 
 fig, ax = plt.subplots(figsize=(12, 10))
 sns.heatmap(
-    cm,
-    annot=True,
-    fmt="d",
-    cmap="viridis",
-    xticklabels=CLASS_NAMES,
+    cm, 
+    annot=True, 
+    fmt="d", 
+    cmap="viridis", 
+    xticklabels=CLASS_NAMES, 
     yticklabels=CLASS_NAMES,
     ax=ax,
-    cbar_kws={"label": "Count"},
+    cbar_kws={"label": "Count"}
 )
 ax.set_xlabel("Predicted Label", fontsize=12)
 ax.set_ylabel("True Label", fontsize=12)
-ax.set_title(
-    "Confusion Matrix — EfficientNet-B0 (Test Set)", fontsize=13, fontweight="bold"
-)
+ax.set_title("Confusion Matrix — EfficientNet-B0 (Test Set)", fontsize=13, fontweight="bold")
 plt.xticks(rotation=45, ha="right")
 plt.yticks(rotation=0)
 
@@ -828,9 +803,7 @@ print(f"Total misclassifications: {len(misclassified_idx)} / {len(all_labels)}\n
 
 # Randomly sample 10 misclassified images
 np.random.seed(42)
-sample_idx = np.random.choice(
-    misclassified_idx, size=min(10, len(misclassified_idx)), replace=False
-)
+sample_idx = np.random.choice(misclassified_idx, size=min(10, len(misclassified_idx)), replace=False)
 
 # Reverse the normalization for display (ImageNet denormalization)
 mean = np.array([0.485, 0.456, 0.406])
@@ -839,16 +812,18 @@ std = np.array([0.229, 0.224, 0.225])
 fig, axes = plt.subplots(2, 5, figsize=(20, 8))
 for i, idx in enumerate(sample_idx):
     row, col = i // 5, i % 5
-
+    
     # Get raw image from test set
     img = X_test[idx].astype(np.float32) / 255.0
-
+    
     true_class = CLASS_NAMES[all_labels[idx]]
     pred_class = CLASS_NAMES[all_preds[idx]]
-
+    
     axes[row, col].imshow(img)
     axes[row, col].set_title(
-        f"True: {true_class}\nPred: {pred_class}", fontsize=9, color="red"
+        f"True: {true_class}\nPred: {pred_class}",
+        fontsize=9,
+        color="red"
     )
     axes[row, col].axis("off")
 
@@ -883,7 +858,6 @@ plt.show()
 #
 # These features are grounded in established morphological analysis techniques used in astronomical image processing research.
 
-
 # %%
 def preprocess_gray(img, size=128):
     """Convert RGB image to grayscale and resize for feature extraction."""
@@ -893,31 +867,22 @@ def preprocess_gray(img, size=128):
         gray = gray.astype(np.uint8)
     return gray
 
-
 # Haralick Texture Features (via scikit-image GLCM)
 def extract_haralick(gray):
     """Gray-level co-occurrence matrix texture features."""
-    glcm = graycomatrix(
-        gray,
-        distances=[1],
-        angles=[0, np.pi / 4, np.pi / 2, 3 * np.pi / 4],
-        levels=256,
-        symmetric=True,
-        normed=True,
-    )
+    glcm = graycomatrix(gray, distances=[1], angles=[0, np.pi/4, np.pi/2, 3*np.pi/4],
+                        levels=256, symmetric=True, normed=True)
     props = ["contrast", "dissimilarity", "homogeneity", "energy", "correlation", "ASM"]
     features = []
     for prop in props:
         features.append(graycoprops(glcm, prop).mean())
     return np.array(features)
 
-
 # Hu Shape Moments
 def extract_hu(gray):
     """Hu moments — translation, rotation, and scale invariant."""
     moments = cv2.moments(gray)
     return cv2.HuMoments(moments).flatten()
-
 
 # Additional Shape Moments (replaces Zernike)
 def extract_shape_moments(gray):
@@ -927,7 +892,6 @@ def extract_shape_moments(gray):
     keys = ["nu20", "nu11", "nu02", "nu30", "nu21", "nu12", "nu03"]
     return np.array([moments[k] for k in keys])
 
-
 # Color Stats
 def extract_color_features(rgb):
     """Mean and standard deviation per RGB channel."""
@@ -935,42 +899,37 @@ def extract_color_features(rgb):
     stds = rgb.std(axis=(0, 1))
     return np.concatenate([means, stds])
 
-
 # Edge Intensity
 def extract_edges(gray):
     """Canny edge intensity statistics."""
     edges = cv2.Canny(gray, 50, 150)
     return np.array([edges.mean(), edges.std()])
 
-
 # Combine All Features
 def extract_features(img):
     """Extract all hand-crafted features from a single galaxy image.
-
+    
     Args:
         img (np.ndarray): RGB galaxy image, shape (256, 256, 3), range [0, 255]
-
+    
     Returns:
         np.ndarray: Concatenated feature vector
     """
     gray = preprocess_gray(img)
-    return np.concatenate(
-        [
-            extract_haralick(gray),
-            extract_shape_moments(gray),
-            extract_hu(gray),
-            extract_color_features(img),
-            extract_edges(gray),
-        ]
-    )
-
+    return np.concatenate([
+        extract_haralick(gray),
+        extract_shape_moments(gray),
+        extract_hu(gray),
+        extract_color_features(img),
+        extract_edges(gray),
+    ])
 
 # %%
 # Verify feature vector dimensions on a single sample
 sample_features = extract_features(X_train[0])
 print(f"Feature vector shape: {sample_features.shape}")
 print(f"Total features: {len(sample_features)}")
-print("Breakdown: Haralick=6, Shape=7, Hu=7, Color=6, Edges=2 → Total=28")
+print('Breakdown: Haralick=6, Shape=7, Hu=7, Color=6, Edges=2 → Total=28')
 
 # %% [markdown]
 # [**⬆ Back to Table of Contents**](#table-of-contents)
@@ -992,7 +951,7 @@ feature_list = []
 
 for i, img in enumerate(images):
     if i % 2000 == 0:
-        print(f"  Progress: {i}/{len(images)} ({i / len(images) * 100:.1f}%)")
+        print(f"  Progress: {i}/{len(images)} ({i/len(images)*100:.1f}%)")
     feature_list.append(extract_features(img))
 
 X_feat = np.array(feature_list)
@@ -1030,7 +989,7 @@ del X_temp_f, y_temp_f
 print(f"Training:   {X_train_f.shape}  ({len(y_train_f)} samples)")
 print(f"Validation: {X_val_f.shape}   ({len(y_val_f)} samples)")
 print(f"Test:       {X_test_f.shape}   ({len(y_test_f)} samples)")
-print("Split ratio: 70% / 15% / 15%")
+print('Split ratio: 70% / 15% / 15%')
 
 # %% [markdown]
 # [**⬆ Back to Table of Contents**](#table-of-contents)
@@ -1052,14 +1011,14 @@ print("Split ratio: 70% / 15% / 15%")
 # Standardize features — fit on training data only to prevent data leakage
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train_f)
-X_val_scaled = scaler.transform(X_val_f)
-X_test_scaled = scaler.transform(X_test_f)
+X_val_scaled   = scaler.transform(X_val_f)
+X_test_scaled  = scaler.transform(X_test_f)
 
 # PCA — preserve 95% of variance after standardization
 pca = PCA(n_components=0.95)
 X_train_pca = pca.fit_transform(X_train_scaled)
-X_val_pca = pca.transform(X_val_scaled)
-X_test_pca = pca.transform(X_test_scaled)
+X_val_pca   = pca.transform(X_val_scaled)
+X_test_pca  = pca.transform(X_test_scaled)
 
 print(f"Original features:     {X_train_f.shape[1]}")
 print(f"PCA components:        {X_train_pca.shape[1]}")
@@ -1113,9 +1072,9 @@ plt.show()
 # %%
 models = {
     "RandomForest": RandomForestClassifier(n_estimators=300, random_state=42),
-    "SVM (RBF)": SVC(kernel="rbf", C=3, gamma="scale", random_state=42),
-    "ExtraTrees": ExtraTreesClassifier(n_estimators=300, random_state=42),
-    "kNN": KNeighborsClassifier(n_neighbors=5),
+    "SVM (RBF)":    SVC(kernel="rbf", C=3, gamma="scale", random_state=42),
+    "ExtraTrees":   ExtraTreesClassifier(n_estimators=300, random_state=42),
+    "kNN":          KNeighborsClassifier(n_neighbors=5),
 }
 
 results = {}
@@ -1138,21 +1097,19 @@ for name, scores in sorted(results.items(), key=lambda x: x[1]["val"], reverse=T
 print("--- Test Set Evaluation ---\n")
 
 for name, model in models.items():
-    print(f"\n{'=' * 50}")
+    print(f"\n{'='*50}")
     print(f"  {name}")
-    print(f"{'=' * 50}")
-
+    print(f"{'='*50}")
+    
     preds = model.predict(X_test_pca)
     test_acc = (preds == y_test_f).mean()
     print(f"  Test Accuracy: {test_acc:.4f}\n")
-
+    
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=UndefinedMetricWarning)
-        print(
-            classification_report(
-                y_test_f, preds, target_names=CLASS_NAMES, zero_division=0
-            )
-        )
+        print(classification_report(
+            y_test_f, preds, target_names=CLASS_NAMES, zero_division=0
+        ))
     results[name]["test"] = test_acc
 
 # %% [markdown]
@@ -1171,7 +1128,6 @@ for name, model in models.items():
 # Collect all test accuracies
 model_names = list(results.keys())
 test_accs = [results[name]["test"] for name in model_names]
-from pickle import TRUE
 
 # Add CNN accuracy
 assert "cnn_test_acc" in dir(), "Run the EfficientNet-B0 evaluation cell first"
@@ -1186,28 +1142,15 @@ model_names, test_accs = zip(*paired)
 colors = plt.cm.viridis(np.linspace(0, 1, len(model_names)))
 fig, ax = plt.subplots(figsize=(10, 6))
 
-bars = ax.bar(
-    model_names, test_accs, color=colors, alpha=0.85, edgecolor="white", linewidth=0.5
-)
+bars = ax.bar(model_names, test_accs, color=colors, alpha=0.85, edgecolor="white", linewidth=0.5)
 
 # Add value labels on top of each bar
 for bar, acc in zip(bars, test_accs):
-    ax.text(
-        bar.get_x() + bar.get_width() / 2,
-        bar.get_height() + 0.01,
-        f"{acc:.1%}",
-        ha="center",
-        va="bottom",
-        fontsize=11,
-        fontweight="bold",
-    )
+    ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01,
+            f"{acc:.1%}", ha="center", va="bottom", fontsize=11, fontweight="bold")
 
 ax.set_ylabel("Test Accuracy")
-ax.set_title(
-    "Model Comparison — Traditional ML vs. Deep Learning",
-    fontsize=13,
-    fontweight="bold",
-)
+ax.set_title("Model Comparison — Traditional ML vs. Deep Learning", fontsize=13, fontweight="bold")
 ax.set_ylim(0, 1.0)
 ax.grid(axis="y", alpha=0.3)
 plt.xticks(rotation=30, ha="right")
