@@ -211,7 +211,7 @@ For astronomy researchers: traditional ML offers a fast, interpretable baseline 
 
 ### Reproducibility
 
-- **Python version:** 3.13 (tested locally)
+- **Python version:** 3.13.17 (tested locally)
 
 - **Platform:** Windows 11
 
